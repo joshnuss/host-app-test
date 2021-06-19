@@ -4,23 +4,32 @@
 // TODO: add more stats types to measure
 // TODO: call clickhouse
 import os from 'os'
+import { exec } from 'child_process'
 import { ClickHouse } from 'clickhouse'
 
 const client = new ClickHouse({basicAuth: {username: 'default', password: 'karamba'}, config: {database: 'hosting'}})
+const hostname = os.hostname()
 const oldConsole = console
+
+let commit = ''
+
+exec('git rev-parse HEAD', (err, stdout) => {
+  if (!err) commit = stdout
+})
 
 const db = {
   async insertLog(type, message, args) {
     const record = {
       type,
       message,
-      host: os.hostname(),
+      host: hostname,
+      commit,
       data: JSON.stringify(args),
       timestamp: new Date()
     }
 
     await client
-      .insert('INSERT INTO logs (type, timestamp, host, message, data)', record)
+      .insert('INSERT INTO logs (type, timestamp, host, commit, message, data)', record)
       .toPromise()
   }
 }
