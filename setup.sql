@@ -1,8 +1,9 @@
 DROP TABLE IF EXISTS logs;
 
 CREATE TABLE logs (
-  type VARCHAR NOT NULL,
+  type VARCHAR DEFAULT 'info' NOT NULL,
   timestamp DATETIME NOT NULL,
+  host VARCHAR DEFAULT 'unknown' NOT NULL,
   message TEXT NOT NULL,
-  json TEXT
+  data TEXT
 ) ENGINE = MergeTree() ORDER BY timestamp;

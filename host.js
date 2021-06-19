@@ -3,6 +3,7 @@
 // TODO: add metadata: host name, request ip, git sha, timestamp
 // TODO: add more stats types to measure
 // TODO: call clickhouse
+import os from 'os'
 import { ClickHouse } from 'clickhouse'
 
 const client = new ClickHouse({basicAuth: {username: 'default', password: 'karamba'}, config: {database: 'hosting'}})
@@ -10,10 +11,16 @@ const oldConsole = console
 
 const db = {
   async insertLog(type, message, args) {
-    const row = {type, message, json: JSON.stringify(args), timestamp: new Date()}
+    const record = {
+      type,
+      message,
+      host: os.hostname(),
+      data: JSON.stringify(args),
+      timestamp: new Date()
+    }
 
     await client
-      .insert('INSERT INTO logs (type, timestamp, message, json)', row)
+      .insert('INSERT INTO logs (type, timestamp, host, message, data)', record)
       .toPromise()
   }
 }
