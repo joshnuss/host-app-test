@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "clickhouse": "^2.4.0",
     "express": "^4.17.1",
     "memory-streams": "^0.1.3"
   }

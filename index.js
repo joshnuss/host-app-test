@@ -8,7 +8,7 @@ host.express(app, () => {
   app.get('/', (req, res) => {
     metrics.increment('request.count')
 
-    console.log('ohai')
+    console.log('ohai', {a: 1, b: 2})
 
     // throw new Error('whoops')
     res.end('hello world')
