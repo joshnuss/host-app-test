@@ -1,6 +1,7 @@
 // TODO: add dashboard with ws in dev mode: analytics, errors, metrics, logs, uptime/ping
 // TODO: add context data/breadcrumbs
 // TODO: add more stats types to measure
+// TODO: support more console features
 // TODO: call clickhouse: +logs, +errors, -metrics, +requests
 import os from 'os'
 import RequestIp from '@supercharge/request-ip'
@@ -57,19 +58,20 @@ const db = {
       .toPromise()
   },
 
-  async insertRequest(req) {
+  async insertRequest(req, statusCode) {
     const record = {
       id: req.id,
       url: req.url,
       host: hostname,
       headers: JSON.stringify(req.headers),
+      status_code: statusCode,
       commit,
       ip: req.parsed_ip,
       timestamp: new Date()
     }
 
     await client
-      .insert('INSERT INTO requests (id, url, timestamp, host, ip, headers, commit)', record)
+      .insert('INSERT INTO requests (id, url, timestamp, host, ip, headers, status_code, commit)', record)
       .toPromise()
   }
 }
@@ -122,8 +124,12 @@ export const host = {
 
     app.use((req, res, next) => {
       req.parsed_ip = RequestIp.getClientIp(req)
+      const end = res.end
+      res.end = function(chunk, encoding) {
+        db.insertRequest(req, res.statusCode)
 
-      db.insertRequest(req)
+        end.bind(res)(chunk, encoding)
+      }
 
       wrapWithZone(req, next)
     })

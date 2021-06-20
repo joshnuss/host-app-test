@@ -9,6 +9,7 @@ CREATE TABLE requests (
   host VARCHAR,
   ip VARCHAR,
   headers TEXT DEFAULT '{}' NOT NULL,
+  status_code UInt16 NOT NULL,
   commit VARCHAR
 ) ENGINE = MergeTree() ORDER BY timestamp;
 
