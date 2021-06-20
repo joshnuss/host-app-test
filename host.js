@@ -1,7 +1,7 @@
-// TODO: add dashboard with ws in dev mode: analytics, trace, errors, metrics, logs
+// TODO: add dashboard with ws in dev mode: analytics, errors, metrics, logs, uptime/ping
 // TODO: add context data/breadcrumbs
 // TODO: add more stats types to measure
-// TODO: call clickhouse: +logs, -errors, -metrics, -requests
+// TODO: call clickhouse: +logs, +errors, -metrics, +requests
 import os from 'os'
 import RequestIp from '@supercharge/request-ip'
 import { exec } from 'child_process'
@@ -55,6 +55,22 @@ const db = {
     await client
       .insert('INSERT INTO errors (request_id, type, timestamp, host, ip, commit, message, stacktrace)', record)
       .toPromise()
+  },
+
+  async insertRequest(req) {
+    const record = {
+      id: req.id,
+      url: req.url,
+      host: hostname,
+      headers: JSON.stringify(req.headers),
+      commit,
+      ip: req.parsed_ip,
+      timestamp: new Date()
+    }
+
+    await client
+      .insert('INSERT INTO requests (id, url, timestamp, host, ip, headers, commit)', record)
+      .toPromise()
   }
 }
 
@@ -93,7 +109,7 @@ function wrapWithZone(req, callback) {
   Zone.current.fork({name: req.id}).run(() => {
     Zone.current.req = {
       id: req.id,
-      ip: RequestIp.getClientIp(req),
+      ip: req.parsed_ip,
       url: req.url
     }
     callback()
@@ -105,6 +121,10 @@ export const host = {
     app.use(requestId())
 
     app.use((req, res, next) => {
+      req.parsed_ip = RequestIp.getClientIp(req)
+
+      db.insertRequest(req)
+
       wrapWithZone(req, next)
     })
 

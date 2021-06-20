@@ -1,5 +1,16 @@
+DROP TABLE IF EXISTS requests;
 DROP TABLE IF EXISTS logs;
 DROP TABLE IF EXISTS errors;
+
+CREATE TABLE requests (
+  id VARCHAR NOT NULL,
+  url VARCHAR NOT NULL,
+  timestamp DATETIME NOT NULL,
+  host VARCHAR,
+  ip VARCHAR,
+  headers TEXT DEFAULT '{}' NOT NULL,
+  commit VARCHAR
+) ENGINE = MergeTree() ORDER BY timestamp;
 
 CREATE TABLE logs (
   request_id VARCHAR NOT NULL,
