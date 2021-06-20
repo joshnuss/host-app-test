@@ -1,11 +1,13 @@
 // TODO: add dashboard with ws in dev mode: analytics, trace, errors, metrics, logs
-// TODO: add context data
-// TODO: add metadata: host name, request ip, git sha, timestamp
+// TODO: add context data/breadcrumbs
 // TODO: add more stats types to measure
-// TODO: call clickhouse
+// TODO: call clickhouse: +logs, -errors, -metrics, -requests
 import os from 'os'
+import RequestIp from '@supercharge/request-ip'
 import { exec } from 'child_process'
 import { ClickHouse } from 'clickhouse'
+import requestId from 'express-request-id'
+import 'zone.js'
 
 const client = new ClickHouse({basicAuth: {username: 'default', password: 'karamba'}, config: {database: 'hosting'}})
 const hostname = os.hostname()
@@ -19,17 +21,20 @@ exec('git rev-parse HEAD', (err, stdout) => {
 
 const db = {
   async insertLog(type, message, args) {
+    const req = Zone.current.req
     const record = {
       type,
       message,
       host: hostname,
       commit,
+      ip: req.ip,
+      request_id: req.id,
       data: JSON.stringify(args),
       timestamp: new Date()
     }
 
     await client
-      .insert('INSERT INTO logs (type, timestamp, host, commit, message, data)', record)
+      .insert('INSERT INTO logs (request_id, type, timestamp, host, ip, commit, message, data)', record)
       .toPromise()
   }
 }
@@ -67,9 +72,18 @@ export const metrics = {
 
 export const host = {
   express(app, callback) {
+    app.use(requestId())
+
     app.use((req, res, next) => {
-     console.log('request', req.url)
-     next()
+      Zone.current.fork({name: req.id}).run(() => {
+        Zone.current.req = {
+          id: req.id,
+          ip: RequestIp.getClientIp(req),
+          url: req.url
+        }
+
+        next()
+      })
     })
 
     app.get('/ping', (req, res) => {
