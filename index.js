@@ -10,10 +10,9 @@ host.express(app, () => {
 
     console.log('this is really cool')
     console.log('this is extremely cool')
-    console.error('whoops')
     console.log('ohai', {a: 1, b: 2})
 
-    // throw new Error('whoops')
+    throw new Error('whoops')
     res.end('hello world')
   })
 
