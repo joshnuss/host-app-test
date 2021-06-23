@@ -11,10 +11,13 @@ import RequestIp from '@supercharge/request-ip'
 import { exec } from 'child_process'
 import { ClickHouse } from 'clickhouse'
 import requestId from 'express-request-id'
+import path from 'path'
 import 'zone.js'
 
 const client = new ClickHouse({basicAuth: {username: 'default', password: 'karamba'}, config: {database: 'hosting'}})
 const hostname = os.hostname()
+const environment = process.env.NODE_ENV || 'dev'
+const app = path.basename(path.dirname(import.meta.url))
 const oldConsole = console
 
 let commit = ''
@@ -31,6 +34,8 @@ const db = {
       message,
       host: hostname,
       commit,
+      environment,
+      app,
       ip: req.ip,
       request_id: req.id,
       data: JSON.stringify(args),
@@ -38,7 +43,7 @@ const db = {
     }
 
     await client
-      .insert('INSERT INTO logs (request_id, type, timestamp, host, ip, commit, message, data)', record)
+      .insert('INSERT INTO logs (request_id, type, timestamp, host, app, environment, ip, commit, message, data)', record)
       .toPromise()
   },
 
@@ -49,6 +54,8 @@ const db = {
       type: error.name,
       message: error.message,
       host: hostname,
+      environment,
+      app,
       commit,
       ip: req.ip,
       request_id: req.id,
@@ -57,7 +64,7 @@ const db = {
     }
 
     await client
-      .insert('INSERT INTO errors (request_id, type, timestamp, host, ip, commit, message, stacktrace)', record)
+      .insert('INSERT INTO errors (request_id, type, timestamp, host, app, environment, ip, commit, message, stacktrace)', record)
       .toPromise()
   },
 
@@ -68,13 +75,15 @@ const db = {
       host: hostname,
       headers: JSON.stringify(req.headers),
       status_code: statusCode,
+      environment,
+      app,
       commit,
       ip: req.parsed_ip,
       timestamp: new Date()
     }
 
     await client
-      .insert('INSERT INTO requests (id, url, timestamp, host, ip, headers, status_code, commit)', record)
+      .insert('INSERT INTO requests (id, url, timestamp, host, app, environment, ip, headers, status_code, commit)', record)
       .toPromise()
   }
 }
