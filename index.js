@@ -14,7 +14,7 @@ host.express(app, () => {
 
     //throw new Error('whoops')
 
-    res.status(201).end('hello world')
+    res.status(200).end('hello world')
   })
 
 })

@@ -3,6 +3,9 @@
 // TODO: add more stats types to measure
 // TODO: support more console features
 // TODO: call clickhouse: +logs, +errors, -metrics, +requests
+// TODO: add app, and environment fields
+// TODO: add an admin using tailwindui
+// TODO: add a backend with clickhouse
 import os from 'os'
 import RequestIp from '@supercharge/request-ip'
 import { exec } from 'child_process'
