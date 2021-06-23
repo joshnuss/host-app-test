@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS requests;
 DROP TABLE IF EXISTS logs;
 DROP TABLE IF EXISTS errors;
+DROP TABLE IF EXISTS metrics;
 
 CREATE TABLE requests (
   id VARCHAR NOT NULL,
@@ -9,6 +10,8 @@ CREATE TABLE requests (
   host VARCHAR,
   app VARCHAR,
   environment VARCHAR,
+  language VARCHAR,
+  client VARCHAR,
   ip VARCHAR,
   headers TEXT DEFAULT '{}' NOT NULL,
   status_code UInt16 NOT NULL,
@@ -22,6 +25,8 @@ CREATE TABLE logs (
   host VARCHAR,
   app VARCHAR,
   environment VARCHAR,
+  language VARCHAR,
+  client VARCHAR,
   ip VARCHAR,
   commit VARCHAR,
   message TEXT NOT NULL,
@@ -36,6 +41,8 @@ CREATE TABLE errors (
   host VARCHAR,
   app VARCHAR,
   environment VARCHAR,
+  language VARCHAR,
+  client VARCHAR,
   ip VARCHAR,
   commit VARCHAR,
   stacktrace Array(VARCHAR) DEFAULT array() NOT NULL
@@ -49,6 +56,8 @@ CREATE TABLE metrics (
   host VARCHAR,
   app VARCHAR,
   environment VARCHAR,
+  language VARCHAR,
+  client VARCHAR,
   value Int64 NOT NULL,
   tags Array(VARCHAR) DEFAULT array() NOT NULL
 ) ENGINE = MergeTree() ORDER BY timestamp;
