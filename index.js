@@ -6,7 +6,8 @@ const app = express()
 host.express(app, () => {
 
   app.get('/', (req, res) => {
-    metrics.increment('request.count')
+    metrics.increment('checkout.success', 2, {tags: ['custom', 'v2']})
+    metrics.decrement('chechout.success')
 
     console.log('this is really cool')
     console.log('this is extremely cool')

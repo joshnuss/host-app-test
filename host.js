@@ -85,7 +85,26 @@ const db = {
     await client
       .insert('INSERT INTO requests (id, url, timestamp, host, app, environment, ip, headers, status_code, commit)', record)
       .toPromise()
-  }
+  },
+
+  async insertMetric(metric) {
+    const req = Zone.current.req || {}
+    const record = {
+      type: metric.type,
+      name: metric.name,
+      tags: metric.tags || [],
+      value: metric.value,
+      host: hostname,
+      environment,
+      app,
+      request_id: req.id,
+      timestamp: new Date()
+    }
+
+    await client
+      .insert('INSERT INTO metrics (request_id, name, type, timestamp, host, app, environment, value, tags)', record)
+      .toPromise()
+  },
 }
 
 global.console = {
@@ -110,12 +129,12 @@ global.console = {
 }
 
 export const metrics = {
-  increment(metric, by=1) {
-    oldConsole.log(`dec:${metric}.${by}`)
+  increment(name, value=1, options = {}) {
+    db.insertMetric({name, type: 'counter', value, tags: options.tags})
   },
 
-  decrement(metric, by=1) {
-    oldConsole.log(`inc:${metric}.${by}`)
+  decrement(name, value=1, options = {}) {
+    db.insertMetric({name, type: 'counter', value: -value, tags: options.tags})
   }
 }
 
