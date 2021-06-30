@@ -4,10 +4,11 @@
 // TODO: support more console features
 // TODO: add an admin using tailwindui
 // TODO: add a backend with clickhouse
-// TODO: add language: ruby, node, elixir, etc.., and `clickhouse`
 // TODO: support backround jobs
 // TODO: remote server
 // TODO: build ruby version
+// TODO: add landing page with video or animation
+// TODO: add docs page
 import os from 'os'
 import RequestIp from '@supercharge/request-ip'
 import { exec } from 'child_process'
