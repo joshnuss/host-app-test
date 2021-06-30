@@ -1,6 +1,15 @@
-Testing ground for monitoring solution.
+Testing ground for monitoring solution
+----------------
 
-By wrapping the app, it provides all monitoring backed by ClickHouse:
+By wrapping youe app with 1 line of code, you get a complete monitoring solution:
+
+```diff
++++host.express(app, () => {
+app.get('/', (req, res) => {
+  res.end('hello world!')
+})
++++})
+```
 
 ## Error reporting
 
