@@ -4,10 +4,15 @@ Testing ground for monitoring solution
 By wrapping youe app with 1 line of code, you get a complete monitoring solution:
 
 ```diff
+import express from 'express'
++++import host from '...'
+
+const app = express()
+
 +++host.express(app, () => {
-app.get('/', (req, res) => {
-  res.end('hello world!')
-})
+  app.get('/', (req, res) => {
+    res.end('hello world!')
+  })
 +++})
 ```
 
